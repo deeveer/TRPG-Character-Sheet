@@ -1,31 +1,41 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require('sequelize');
+const sequelize = global.sequelize;
 
-const tempUserSchema = new mongoose.Schema({
+const TempUser = sequelize.define('TempUser', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     name: {
-        type: String,
-        required: true,
-        min: 4,
-        max: 20,
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        validate: {
+            len: [4, 20]
+        }
     },
     email: {
-        type: String,
-        required: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
     password: {
-        type: String,
-        required: true,
-        min: 6,
-        max: 15
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        validate: {
+            len: [6, 255]
+        }
     },
-    type:{
-        type:String,
-        required:true
+    type: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
     createdAt: {
-        type: Date,
-        index: {expires: 600},
-        default: Date.now()
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
     }
+}, {
+    tableName: 'temp_users',
+    timestamps: false
 });
 
-module.exports = mongoose.model("tempUser", tempUserSchema);
+module.exports = TempUser;

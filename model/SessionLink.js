@@ -1,16 +1,24 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require('sequelize');
+const sequelize = global.sequelize;
 
-const SessionLinkSchema = new mongoose.Schema({
+const SessionLink = sequelize.define('SessionLink', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     code: {
-        type: String,
-        unique:true,
-        required:true
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
     },
     expireAt: {
-        type: Date,
-        index: {expires: 604800},
-        default: Date.now()+604800
+        type: DataTypes.DATE,
+        defaultValue: () => new Date(Date.now() + 604800000) // 7 days in milliseconds
     }
+}, {
+    tableName: 'session_links',
+    timestamps: false
 });
 
-module.exports = mongoose.model("SessionLink", SessionLinkSchema);
+module.exports = SessionLink;

@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const Session = require('../model/Session');
-const mongoose = require('mongoose')
 const User = require("../model/User");
 const Info = require('../model/SheetInfo');
 const SessionLink = require('../model/SessionLink')
@@ -11,17 +10,29 @@ const {CharacterSheet} = require("../model/CharacterSheet");
 // Get User's Sessions
 router.get('/getSessions', verify, async function (req, res) {
     const player = req.token;
-    const SessionFind = await Session.findOne({player: player.name});
+    const SessionFind = await Session.findOne({
+        where: {
+            player: {
+                [require('sequelize').Op.contains]: [player.name]
+            }
+        }
+    });
     if (!SessionFind) {
         res.send('你還沒創建團務')
     } else {
-        const cursor = await Session.find({player: {$in: [player.name]}});
+        const sessions = await Session.findAll({
+            where: {
+                player: {
+                    [require('sequelize').Op.contains]: [player.name]
+                }
+            }
+        });
         const session = [];
-        cursor.forEach(function (Session) {
+        sessions.forEach(function (sessionItem) {
             session.push({
-                name: Session.name,
-                gm: Session.gm,
-                id: Session._id
+                name: sessionItem.name,
+                gm: sessionItem.gm,
+                id: sessionItem.id
             })
         });
         res.status(200).send(session)
@@ -33,7 +44,7 @@ router.get('/getSessions', verify, async function (req, res) {
 router.get('/getInfo/:id', verify, async function (req, res) {
     const id = req.params.id
     try {
-        const info = await Session.findById({_id: id}).lean()
+        const info = await Session.findByPk(id)
         if (!info) return res.sendStatus(404)
         const sheets = {}
         const player = req.token;
@@ -42,8 +53,8 @@ router.get('/getInfo/:id', verify, async function (req, res) {
         for (let user in info.sheet) {
             sheets[user] = []
             // Check for every sheet's permission
-            for(let id of info.sheet[user]){
-                const memberSheet = await new CharacterSheet().init(id,player)
+            for(let sheetId of info.sheet[user]){
+                const memberSheet = await new CharacterSheet().init(sheetId, player)
                 if(memberSheet.checkOwn() || await memberSheet.checkView(info)){
                     let sheet = await memberSheet.exec("stat")
                     sheets[user].push(Object.assign({
@@ -57,10 +68,11 @@ router.get('/getInfo/:id', verify, async function (req, res) {
                 }
             }
         }
-        info.sheets = sheets
-        const link = await SessionLink.findById({_id: info._id})
-        info.code = (link) ? link.code : ""
-        res.status(200).send(info)
+        const infoData = info.toJSON()
+        infoData.sheets = sheets
+        const link = await SessionLink.findOne({ where: { id: info.id } })
+        infoData.code = (link) ? link.code : ""
+        res.status(200).send(infoData)
     } catch (err) {
         console.log(err)
         res.sendStatus(404)

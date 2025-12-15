@@ -1,111 +1,107 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require('sequelize');
+const sequelize = global.sequelize;
 
-const DND5eStorySchema = new mongoose.Schema({
+const DND5eStory = sequelize.define('DND5eStory', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    sheet_info_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'sheet_infos',
+            key: 'id'
+        }
+    },
     class: {
-        type: String,
-        max: 20,
-        default: ''
+        type: DataTypes.STRING(20),
+        defaultValue: ''
     },
     level: {
-        type: String,
-        max: 20,
-        default: ''
+        type: DataTypes.STRING(20),
+        defaultValue: ''
     },
     background: {
-        type: String,
-        max: 30,
-        default: ''
+        type: DataTypes.STRING(30),
+        defaultValue: ''
     },
     race: {
-        type: String,
-        max: 20,
-        default: ''
+        type: DataTypes.STRING(20),
+        defaultValue: ''
     },
     faction: {
-        type: String,
-        max: 20,
-        default: ''
+        type: DataTypes.STRING(20),
+        defaultValue: ''
     },
     exp: {
-        type: String,
-        max: 20,
-        default: ''
+        type: DataTypes.STRING(20),
+        defaultValue: ''
     },
     height: {
-        type: String,
-        max: 20,
-        default: ''
+        type: DataTypes.STRING(20),
+        defaultValue: ''
     },
     skin: {
-        type: String,
-        max: 20,
-        default: ''
+        type: DataTypes.STRING(20),
+        defaultValue: ''
     },
     age: {
-        type: String,
-        max: 20,
-        default: ''
+        type: DataTypes.STRING(20),
+        defaultValue: ''
     },
     weight: {
-        type: String,
-        max: 20,
-        default: ''
+        type: DataTypes.STRING(20),
+        defaultValue: ''
     },
     hair: {
-        type: String,
-        max: 20,
-        default: ''
+        type: DataTypes.STRING(20),
+        defaultValue: ''
     },
     pupil: {
-        type: String,
-        max: 20,
-        default: ""
+        type: DataTypes.STRING(20),
+        defaultValue: ""
     },
     trait: {
-        type: String,
-        max: 1024,
-        default: ''
+        type: DataTypes.TEXT,
+        defaultValue: ''
     },
     alignment: {
-        type: String,
-        max: 1024,
-        default: ''
+        type: DataTypes.TEXT,
+        defaultValue: ''
     },
     backstory: {
-        type: String,
-        max: 1024,
-        default: ''
+        type: DataTypes.TEXT,
+        defaultValue: ''
     },
     otherTrait: {
-        type: String,
-        max: 1024,
-        default: ''
+        type: DataTypes.TEXT,
+        defaultValue: ''
     },
     personality: {
-        type: String,
-        max: 1024,
-        default: ''
+        type: DataTypes.TEXT,
+        defaultValue: ''
     },
     ideals: {
-        type: String,
-        max: 1024,
-        default: ''
+        type: DataTypes.TEXT,
+        defaultValue: ''
     },
     bonds: {
-        type: String,
-        max: 1024,
-        default: ''
+        type: DataTypes.TEXT,
+        defaultValue: ''
     },
     flaws: {
-        type: String,
-        max: 1024,
-        default: ''
+        type: DataTypes.TEXT,
+        defaultValue: ''
     },
     note: {
-        type: String,
-        max: 10240,
-        default: ''
+        type: DataTypes.TEXT('long'),
+        defaultValue: ''
     }
+}, {
+    tableName: 'dnd5e_stories',
+    timestamps: false
 });
 
-module.exports = mongoose.model("DND5e_Story", DND5eStorySchema);
+module.exports = DND5eStory;

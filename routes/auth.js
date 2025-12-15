@@ -21,18 +21,16 @@ const pattern = new RegExp("[`~!#$^&*()=\\-|{}\':+;,\\\\\\[\\]<>\\n/?￥…—�
 router.get("/register/:id", async (req, res) => {
     //create new user
     const id = req.params.id;
-    const user = await tempUser.findOne({_id: id, type: "email"});
-    if (!user) return res.sendStatus(404);
-    const newUser = new User({
+    const user = await tempUser.findByPk(id);
+    if (!user || user.type !== "email") return res.sendStatus(404);
+    const newUser = await User.create({
         name: user.name,
         email: user.email,
         password: user.password,
         sheet_number: 0,
     });
     try {
-        //await user.save();
-        await tempUser.deleteOne({_id: id});
-        await newUser.save();
+        await tempUser.destroy({ where: { id: id } });
         res.status(200).send(newUser.email)
     } catch (err) {
         res.sendStatus(404)
@@ -59,9 +57,9 @@ router.post('/authed', async (req, res) => {
     if (error) return res.status(400).send(error.details[0].message);
 
     //check if user is already register
-    const userExist = await User.findOne({name: req.body.name});
-    const emailExist = await User.findOne({email: req.body.email});
-    const tempExist = await tempUser.findOne({email: req.body.email, type: "email"});
+    const userExist = await User.findOne({ where: { name: req.body.name } });
+    const emailExist = await User.findOne({ where: { email: req.body.email } });
+    const tempExist = await tempUser.findOne({ where: { email: req.body.email, type: "email" } });
     if (userExist) return res.status(400).send('暱稱已存在');
     if (emailExist) return res.status(400).send('電子郵件已存在');
     if (req.body.password !== req.body.repassword) return res.status(400).send('重新輸入密碼有誤')
@@ -102,7 +100,7 @@ router.post('/userLogin', async (req, res) => {
     const {error} = loginValidation(req.body);
     if (error) return res.status(400).send(error.details[0].message);
     //check if user exist
-    const user = await User.findOne({email: req.body.email});
+    const user = await User.findOne({ where: { email: req.body.email } });
     if (!user) return res.status(400).send('電子郵件不存在');
     //check password
     const validPass = await bcrypt.compare(req.body.password, user.password);
@@ -113,7 +111,7 @@ router.post('/userLogin', async (req, res) => {
         {
             iss: 'trpgtoaster.net',
             exp: (Date.now() + (7 * day)) / 1000,
-            _id: user._id,
+            id: user.id,
             name: user.name,
             email: user.email,
             admin: user.admin
@@ -135,7 +133,7 @@ router.post('/googleLogin', (req, res) => {
     //google verify
     axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${req.body.id}`)
         .then(async info => {
-            const user = await User.findOne({email: info.data.email})
+            const user = await User.findOne({ where: { email: info.data.email } })
             //if user exist
             if (user) {
                 const day = 86409000;
@@ -143,7 +141,7 @@ router.post('/googleLogin', (req, res) => {
                     {
                         iss: 'trpgtoaster.net',
                         exp: (Date.now() + (7 * day)) / 1000,
-                        _id: user._id,
+                        id: user.id,
                         name: user.name,
                         email: user.email,
                         admin: user.admin
@@ -160,7 +158,7 @@ router.post('/googleLogin', (req, res) => {
                 return res.status(200).send(jwt.decode(token))
             } else {
                 //if user doesn't exist
-                const tempExist = await tempUser.findOne({email:info.data.email,type:"google"})
+                const tempExist = await tempUser.findOne({ where: { email: info.data.email, type: "google" } })
                 if(tempExist) return res.send("register")
                 const temp = new tempUser({
                     name: info.data.name,
@@ -183,9 +181,9 @@ router.post('/oauthSignup',async (req, res) => {
     if (error) return res.status(400).send(error.details[0].message);
     axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${req.body.token}`)
         .then(async (info)=>{
-            const tempExist = await tempUser.findOne({email:info.data.email,type:"oauth"})
+            const tempExist = await tempUser.findOne({ where: { email: info.data.email, type: "oauth" } })
             if(!tempExist) return res.status(400).send("你並沒有註冊過!")
-            const userExist = await User.findOne({name:req.body.name})
+            const userExist = await User.findOne({ where: { name: req.body.name } })
             if(userExist) return res.status(400).send("已經有人用過這名稱了!")
             const salt = await bcrypt.genSalt(10);
             const hashPassword = await bcrypt.hash(req.body.password, salt);
@@ -223,9 +221,9 @@ router.get('/authVerify', (req, res) => {
 })
 
 router.get('/getUser/:name', async (req, res) => {
-    const user = await User.findOne({name: req.params.name}).lean()
+    const user = await User.findOne({ where: { name: req.params.name } })
     if (user) {
-        const data = Object.assign({}, user)
+        const data = user.toJSON()
         delete data.password
         return res.status(200).send(data)
     } else return res.sendStatus(404)
@@ -239,8 +237,8 @@ router.get('/logout', (req, res) => {
 //forget password
 router.post('/forgetPassword', async function (req, res) {
     const email = req.body.email;
-    const emailExist = await User.findOne({email: email});
-    const tempExist = await tempUser.findOne({email: email});
+    const emailExist = await User.findOne({ where: { email: email } });
+    const tempExist = await tempUser.findOne({ where: { email: email } });
     if (!emailExist) return res.status(400).send('此電子郵件不存在');
     if (tempExist) return res.status(400).send('你已經發送了修改密碼的電子郵件，請耐心等待')
     const temp = new tempUser({
@@ -287,7 +285,7 @@ router.post('/forgetPassword', async function (req, res) {
 
 router.get('/verifyChangePwd/:id', async function (req, res) {
     try {
-        const tempExist = await tempUser.findOne({_id: req.params.id, type: "password"})
+        const tempExist = await tempUser.findOne({ where: { id: req.params.id, type: "password" } })
         if (!tempExist) return res.sendStatus(400)
         res.sendStatus(200)
     } catch {
@@ -298,20 +296,20 @@ router.get('/verifyChangePwd/:id', async function (req, res) {
 
 //find password
 router.post('/changePassword/:id', async (req, res) => {
-    const check = await tempUser.findById({_id: req.params.id});
+    const check = await tempUser.findByPk(req.params.id);
     if (!check) return res.status(400).send('此連結已失效!');
     if (req.body.password !== req.body.repassword) return res.status(400).send('再次輸入密碼錯誤');
     const {error} = findPasswordValidation(req.body);
     for (let key in req.body) {
-        if (req.body[key].match(pattern)) {
+        if (req.body[key] && req.body[key].match && req.body[key].match(pattern)) {
             return res.status(400).send('你的資料含有特殊字元')
         }
     }
     if (error) return res.status(400).send(error.details[0].message);
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(req.body.password, salt);
-    await User.findOneAndUpdate({email: check.email}, {$set: {password: hashPassword}});
-    await tempUser.deleteOne({_id: req.params.id, type: "password"})
+    await User.update({ password: hashPassword }, { where: { email: check.email } });
+    await tempUser.destroy({ where: { id: req.params.id, type: "password" } })
     res.send('你成功修改了密碼!');
 });
 

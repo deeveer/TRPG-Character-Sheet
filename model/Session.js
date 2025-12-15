@@ -1,25 +1,38 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require('sequelize');
+const sequelize = global.sequelize;
 
-const  TRPGSessionSchema = new mongoose.Schema({
-    name:{
-        type:String,
-        required:true,
-        min:3,
-        max:30
+const Session = sequelize.define('Session', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
     },
-    gm:{
-        type:String,
-        required:true,
+    name: {
+        type: DataTypes.STRING(30),
+        allowNull: false,
+        validate: {
+            len: [3, 30]
+        }
     },
-    player:[String],
+    gm: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    player: {
+        type: DataTypes.JSON,
+        defaultValue: []
+    },
     sheet: {
-        type:Map,
-        of: Array
+        type: DataTypes.JSON,
+        defaultValue: {}
     },
-    date:{
-        type:Date,
-        default:Date.now()
+    date: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
     }
+}, {
+    tableName: 'sessions',
+    timestamps: false
 });
 
-module.exports = mongoose.model("TRPGSession",TRPGSessionSchema);
+module.exports = Session;

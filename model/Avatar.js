@@ -1,15 +1,31 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require('sequelize');
+const sequelize = global.sequelize;
 
-const  Avatar = new mongoose.Schema({
-    type:{
-        type:String,
-        required:true,
-        max:10
+const Avatar = sequelize.define('Avatar', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
     },
-    image:{
-        type:Buffer,
-        default:''
+    sheet_info_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'sheet_infos',
+            key: 'id'
+        }
+    },
+    type: {
+        type: DataTypes.STRING(10),
+        allowNull: false
+    },
+    image: {
+        type: DataTypes.BLOB('long'),
+        allowNull: true
     }
+}, {
+    tableName: 'avatars',
+    timestamps: false
 });
 
-module.exports = mongoose.model("avatar",Avatar);
+module.exports = Avatar;

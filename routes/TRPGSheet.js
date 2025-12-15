@@ -21,15 +21,15 @@ function getToken(token){
 }
 
 router.get('/getSheets', verify, async function (req, res) {
-    const id = req.token._id;
-    const sheets = await Sheet.find({author: {$in: [id]}});
+    const id = req.token.id;
+    const sheets = await Sheet.findAll({ where: { author_id: id } });
     const sheet = [];
-    for (let i=0;i<sheets.length;i++){
+    for (let i = 0; i < sheets.length; i++) {
         sheet.push({
             name: sheets[i].name,
             system: sheets[i].system,
             player: sheets[i].player_name,
-            url: sheets[i]._id
+            url: sheets[i].id
         })
     }
     res.status(200).send(sheet)
@@ -74,15 +74,15 @@ router.post('/getSheetData/:id',async function(req,res){
     }
 })
 
-router.post('/createSheet/:system',verify,async function(req,res){
+router.post('/createSheet/:system', verify, async function(req, res) {
     const creator = req.token;
-    const user = await User.findById({_id: creator._id});
+    const user = await User.findByPk(creator.id);
     if (user.sheet_number >= 50) return res.status(400).send('角色卡已達上限');
     try {
         const sheet = await new CharacterSheet().init()
-        const id = await sheet.create(req.body.name,creator.name,req.params.system,creator._id)
-        await User.updateOne({_id: creator._id}, {$inc: {sheet_number: 1}});
-        res.send(id);
+        const id = await sheet.create(req.body.name, creator.name, req.params.system, creator.id)
+        await User.increment('sheet_number', { where: { id: creator.id } });
+        res.send(id.toString());
     } catch (err) {
         console.log(err);
         res.status(400).send(err);
@@ -109,12 +109,31 @@ router.delete('/deleteSheet/:id', verify, async function (req, res) {
     const sheetId = req.params.id;
     const user = req.token;
     try {
-        const sheet = await new CharacterSheet().init(req.params.id,user)
-        await sheet.delete().exec()
-        await Image.deleteOne({_id: sheetId})
-        await User.updateOne({_id:user._id}, {$inc: {sheet_number: -1}})
-        let query = `sheet.${user.name}`
-        await Session.updateMany({player: user.name}, {$pull:{[query]:sheetId}})
+        const sheet = await new CharacterSheet().init(req.params.id, user)
+        await sheet.delete()
+        await Image.destroy({ where: { sheet_info_id: sheetId } })
+        await User.decrement('sheet_number', { where: { id: user.id } })
+
+        // Remove sheet from sessions
+        const sessions = await Session.findAll({
+            where: {
+                player: {
+                    [require('sequelize').Op.contains]: [user.name]
+                }
+            }
+        })
+
+        for (let session of sessions) {
+            const sheetMap = session.sheet || {}
+            if (sheetMap[user.name]) {
+                sheetMap[user.name] = sheetMap[user.name].filter(id => id !== sheetId)
+                await Session.update(
+                    { sheet: sheetMap },
+                    { where: { id: session.id } }
+                )
+            }
+        }
+
         res.send('已刪除角色卡')
     } catch (err) {
         console.log(err);

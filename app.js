@@ -1,18 +1,13 @@
 const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
-const mongoose = require("mongoose");
+const { Sequelize } = require("sequelize");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const http = require('http');
 const cors = require('cors');
 const path = require('path');
 const rateLimit = require('express-rate-limit')
-//import routes
-const authRoute = require("./routes/auth");
-const TRPGSessionRoute = require('./routes/TRPGSession');
-const TRPGSheetRoute = require('./routes/TRPGSheet');
-const ImageRoute = require('./routes/Image');
 
 
 //set view engine
@@ -21,14 +16,40 @@ dotenv.config();
 app.set('view engine', 'ejs');
 
 // connect Database
-mongoose.connect(process.env.DB_CONNECT || " mongodb://127.0.0.1:27017/test?retryWrites=true&w=majority",
-    {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false})
+const sequelize = new Sequelize(
+    process.env.DB_NAME || 'trpg_db',
+    process.env.DB_USER || 'root',
+    process.env.DB_PASSWORD || '',
+    {
+        host: process.env.DB_HOST || 'localhost',
+        port: process.env.DB_PORT || 3306,
+        dialect: 'mysql',
+        logging: console.log,
+        pool: {
+            max: 5,
+            min: 0,
+            acquire: 30000,
+            idle: 10000
+        }
+    }
+);
+
+sequelize.authenticate()
     .then(() => {
-        console.log('DB started');
+        console.log('MySQL DB connected');
     })
     .catch((err) => {
-        console.log(err);
+        console.log('MySQL connection error:', err);
     });
+
+// Export sequelize for models to use
+global.sequelize = sequelize;
+
+//import routes
+const authRoute = require("./routes/auth");
+const TRPGSessionRoute = require('./routes/TRPGSession');
+const TRPGSheetRoute = require('./routes/TRPGSheet');
+const ImageRoute = require('./routes/Image');
 
 // middleware
 

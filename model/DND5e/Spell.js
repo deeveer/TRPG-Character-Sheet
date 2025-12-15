@@ -1,202 +1,94 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require('sequelize');
+const sequelize = global.sequelize;
 
-const SpellSchema = new mongoose.Schema({
-    check:{
-        type:Boolean,
-        default:false
+const DND5eSpell = sequelize.define('DND5eSpell', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
     },
-    text:{
-        type:String,
-        default:""
-    }
-
-})
-
-const DND5eSpellSchema = new mongoose.Schema({
+    sheet_info_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'sheet_infos',
+            key: 'id'
+        }
+    },
     spell_class: {
-        type: String,
-        max: 30,
-        default: ""
+        type: DataTypes.STRING(30),
+        defaultValue: ""
     },
     spell_ability: {
-        type: String,
-        max: 20,
-        default: ""
+        type: DataTypes.STRING(20),
+        defaultValue: ""
     },
     spell_save: {
-        type: String,
-        max: 20,
-        default: 0
+        type: DataTypes.STRING(20),
+        defaultValue: "0"
     },
     spell_bonus: {
-        type: String,
-        max: 20,
-        default: 0
+        type: DataTypes.STRING(20),
+        defaultValue: "0"
     },
     spell: {
-        "0": {
-            total:{
-                type:Number,
-                max:30,
-                default:0
+        type: DataTypes.JSON,
+        defaultValue: {
+            "0": {
+                total: 0,
+                usage: 0,
+                list: [{}]
             },
-            usage:{
-                type:Number,
-                max:30,
-                default:0
+            "1": {
+                total: 0,
+                usage: 0,
+                list: [{}]
             },
-            list:{
-                type:[SpellSchema],
-                default:() => ([{}])
+            "2": {
+                total: 0,
+                usage: 0,
+                list: [{}]
+            },
+            "3": {
+                total: 0,
+                usage: 0,
+                list: [{}]
+            },
+            "4": {
+                total: 0,
+                usage: 0,
+                list: [{}]
+            },
+            "5": {
+                total: 0,
+                usage: 0,
+                list: [{}]
+            },
+            "6": {
+                total: 0,
+                usage: 0,
+                list: [{}]
+            },
+            "7": {
+                total: 0,
+                usage: 0,
+                list: [{}]
+            },
+            "8": {
+                total: 0,
+                usage: 0,
+                list: [{}]
+            },
+            "9": {
+                total: 0,
+                usage: 0,
+                list: [{}]
             }
-        },
-        "1":{
-            total:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            usage:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            list:{
-                type:[SpellSchema],
-                default:() => ([{}])
-            }
-        },
-        "2":{
-            total:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            usage:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            list:{
-                type:[SpellSchema],
-                default:() => ([{}])
-            }
-        },
-        "3":{
-            total:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            usage:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            list:{
-                type:[SpellSchema],
-                default:() => ([{}])
-            }
-        },
-        "4":{
-            total:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            usage:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            list:{
-                type:[SpellSchema],
-                default:() => ([{}])
-            }
-        },
-        "5":{
-            total:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            usage:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            list:{
-                type:[SpellSchema],
-                default:() => ([{}])
-            }
-        },
-        "6":{
-            total:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            usage:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            list:{
-                type:[SpellSchema],
-                default:() => ([{}])
-            }
-        },
-        "7":{
-            total:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            usage:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            list:{
-                type:[SpellSchema],
-                default:() => ([{}])
-            }
-        },
-        "8":{
-            total:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            usage:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            list:{
-                type:[SpellSchema],
-                default:() => ([{}])
-            }
-        },
-        "9":{
-            total:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            usage:{
-                type:Number,
-                max:30,
-                default:0
-            },
-            list:{
-                type:[SpellSchema],
-                default:() => ([{}])
-            }
-        },
+        }
     }
+}, {
+    tableName: 'dnd5e_spells',
+    timestamps: false
 });
 
-
-
-module.exports = mongoose.model("DND5e_Spell", DND5eSpellSchema);
+module.exports = DND5eSpell;

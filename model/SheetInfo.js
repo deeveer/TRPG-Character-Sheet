@@ -1,40 +1,51 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require('sequelize');
+const sequelize = global.sequelize;
 
-const InfoSchema = new mongoose.Schema({
+const SheetInfo = sequelize.define('SheetInfo', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     name: {
-        type: String,
-        required: true,
-        default: "無名",
-        max: 100
+        type: DataTypes.STRING(100),
+        allowNull: false,
+        defaultValue: "無名"
     },
-    player_name:{
-        type: String,
-        max: 64
+    player_name: {
+        type: DataTypes.STRING(64),
+        allowNull: true
     },
-    author:{
-        type: mongoose.Types.ObjectId,
-        required:true
+    author_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'users',
+            key: 'id'
+        }
     },
-    system:{
-        type: String,
-        required:true
+    system: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
-    permission:{
-        type: String,
-        required:true,
-        enum: ['限團務GM', '團務所有人', '所有人'],
-        default:'所有人'
+    permission: {
+        type: DataTypes.ENUM('限團務GM', '團務所有人', '所有人'),
+        allowNull: false,
+        defaultValue: '所有人'
     },
-    updated:{
-        type: Date,
-        required: true,
-        default: Date.now()
+    updated: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
     },
-    session:Array
+    session: {
+        type: DataTypes.JSON,
+        defaultValue: []
+    }
+}, {
+    tableName: 'sheet_infos',
+    timestamps: false
 });
 
-
-
-
-module.exports = mongoose.model("sheetInfo",InfoSchema,'sheetInfos');
+module.exports = SheetInfo;
 

@@ -1,9 +1,23 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require('sequelize');
+const sequelize = global.sequelize;
 
-const DND5eStatSchema = new mongoose.Schema({
+const DND5eStat = sequelize.define('DND5eStat', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    sheet_info_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'sheet_infos',
+            key: 'id'
+        }
+    },
     stat: {
-        type: Object,
-        default: {
+        type: DataTypes.JSON,
+        defaultValue: {
             str: 10,
             dex: 10,
             con: 10,
@@ -13,75 +27,95 @@ const DND5eStatSchema = new mongoose.Schema({
         }
     },
     inspiration: {
-        type: Number,
-        max: 50,
-        default: 0
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        validate: {
+            max: 50
+        }
     },
     passive_wisdom: {
-        type: Number,
-        max: 50,
-        default: 0
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        validate: {
+            max: 50
+        }
     },
     pro: {
-        type: Number,
-        max: 50,
-        default: 0
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        validate: {
+            max: 50
+        }
     },
     armorValue: {
-        type: Number,
-        max: 128,
-        default: 0
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        validate: {
+            max: 128
+        }
     },
     initiative: {
-        type: Number,
-        max: 50,
-        default: 0
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        validate: {
+            max: 50
+        }
     },
     speed: {
-        type: String,
-        max: 100,
-        default: 0
+        type: DataTypes.STRING(100),
+        defaultValue: '0'
     },
     max_hp: {
-        type: Number,
-        max: 256,
-        default: 0
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        validate: {
+            max: 256
+        }
     },
     hp: {
-        type: Number,
-        max: 256,
-        default: 0
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        validate: {
+            max: 256
+        }
     },
     temp_hp: {
-        type: Number,
-        max: 100,
-        default: 0
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        validate: {
+            max: 100
+        }
     },
     hit_dice_total: {
-        type: Number,
-        max: 50,
-        default: 0
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        validate: {
+            max: 50
+        }
     },
     hit_dice: {
-        type: String,
-        max: 20,
-        default: 0
+        type: DataTypes.STRING(20),
+        defaultValue: '0'
     },
     death_save: {
-        type: String,
-        default: "00"
+        type: DataTypes.STRING(10),
+        defaultValue: "00"
     },
-    savings:{
-        type: [String]
+    savings: {
+        type: DataTypes.JSON,
+        defaultValue: []
     },
     skills: {
-        type: [String]
+        type: DataTypes.JSON,
+        defaultValue: []
     },
     skill_multiplier: {
-        type: Map,
-        of: Number,
-        default:{}
+        type: DataTypes.JSON,
+        defaultValue: {}
     }
+}, {
+    tableName: 'dnd5e_stats',
+    timestamps: false
 });
 
-module.exports = mongoose.model("DND5e_Stat", DND5eStatSchema);
+module.exports = DND5eStat;
