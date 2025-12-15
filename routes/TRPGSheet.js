@@ -95,7 +95,7 @@ router.post('/editSheet/:id', verify, async function (req, res) {
     const user = req.token;
     try {
         const sheet = await new CharacterSheet().init(sheetId,user)
-        sheet.update(cs.info, cs)
+        await sheet.update(cs.info, cs)
         await sheet.exec()
         res.send('success');
     } catch (err) {

@@ -58,11 +58,11 @@ class CharacterSheet {
             author_id: author_id
         })
 
-        // Create related models
-        await DND5eStat.create({ sheet_info_id: this.info.id })
-        await DND5eStory.create({ sheet_info_id: this.info.id })
-        await DND5eEquip.create({ sheet_info_id: this.info.id })
-        await DND5eSpell.create({ sheet_info_id: this.info.id })
+        // Create related models dynamically based on system
+        const systemConfig = systems[system];
+        for (let model of Object.values(systemConfig.schema)) {
+            await model.create({ sheet_info_id: this.info.id });
+        }
         await Avatar.create({ sheet_info_id: this.info.id, type: system })
 
         return this.info.id

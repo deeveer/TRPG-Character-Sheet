@@ -67,18 +67,18 @@ router.post('/authed', async (req, res) => {
     //Hash password
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(req.body.password, salt);
-    //create new user
-    const temp = new tempUser({
-        name: req.body.name,
-        email: req.body.email,
-        password: hashPassword,
-        type: "email",
-        createdAt: Date.now()
-    });
     try {
+        //create new user
+        const temp = await tempUser.create({
+            name: req.body.name,
+            email: req.body.email,
+            password: hashPassword,
+            type: "email"
+        });
+
         ejs.renderFile(__dirname + '/../views/verify_email.ejs',
             {
-                id: temp._id,
+                id: temp.id,
             }, (err, html) => {
                 const mail = {
                     from: 'TRPG Toaster <verifybot@trpgtoaster.net>',
@@ -88,7 +88,6 @@ router.post('/authed', async (req, res) => {
                 };
                 mailTransport.sendMail(mail);
             });
-        await temp.save();
         res.send('已寄出驗證電子郵件，請耐心等待');
     } catch (err) {
         res.status(400).send(err);
@@ -160,14 +159,12 @@ router.post('/googleLogin', (req, res) => {
                 //if user doesn't exist
                 const tempExist = await tempUser.findOne({ where: { email: info.data.email, type: "google" } })
                 if(tempExist) return res.send("register")
-                const temp = new tempUser({
+                await tempUser.create({
                     name: info.data.name,
                     email: info.data.email,
                     password: "test",
-                    type: "oauth",
-                    createdAt: Date.now()
+                    type: "oauth"
                 });
-                await temp.save()
                 res.send("signup")
             }
         })
@@ -187,16 +184,14 @@ router.post('/oauthSignup',async (req, res) => {
             if(userExist) return res.status(400).send("已經有人用過這名稱了!")
             const salt = await bcrypt.genSalt(10);
             const hashPassword = await bcrypt.hash(req.body.password, salt);
-            const newUser = new User({
-                name: req.body.name,
-                email: info.data.email,
-                password: hashPassword,
-                sheet_number: 0,
-            });
             try {
-                //await user.save();
-                await tempUser.deleteOne({_id: tempExist._id});
-                await newUser.save();
+                const newUser = await User.create({
+                    name: req.body.name,
+                    email: info.data.email,
+                    password: hashPassword,
+                    sheet_number: 0,
+                });
+                await tempUser.destroy({ where: { id: tempExist.id } });
                 res.status(200).send("註冊成功!")
             }catch (err){
                 res.send(err)
@@ -241,13 +236,7 @@ router.post('/forgetPassword', async function (req, res) {
     const tempExist = await tempUser.findOne({ where: { email: email } });
     if (!emailExist) return res.status(400).send('此電子郵件不存在');
     if (tempExist) return res.status(400).send('你已經發送了修改密碼的電子郵件，請耐心等待')
-    const temp = new tempUser({
-        name: email,
-        email: email,
-        password: email,
-        type: "password",
-        createdAt: Date.now()
-    });
+
     const mailTransport = nodeMailer.createTransport({
         host: process.env.MAILSERVER,
         port: 465,
@@ -261,9 +250,16 @@ router.post('/forgetPassword', async function (req, res) {
         }
     });
     try {
+        const temp = await tempUser.create({
+            name: email,
+            email: email,
+            password: email,
+            type: "password"
+        });
+
         ejs.renderFile(__dirname + '/../views/find_password.ejs',
             {
-                id: temp._id,
+                id: temp.id,
             }, (err, html) => {
                 const mail = {
                     from: 'TRPG Toaster <verifybot@trpgtoaster.net>',
@@ -273,7 +269,6 @@ router.post('/forgetPassword', async function (req, res) {
                 }
                 mailTransport.sendMail(mail);
             });
-        await temp.save();
         res.send('已寄出找回密碼之電子郵件，請檢查你的電子郵件');
     } catch (err) {
         console.log(err)
