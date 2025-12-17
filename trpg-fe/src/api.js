@@ -14,7 +14,7 @@ export default {
         return ajax('user/oauthSignup','post',data)
     },
     signup(data) {
-        return ajax('user/authed', "post", data)
+        return ajax('user/registerDirect', "post", data)
     },
     logout() {
         return ajax('user/logout', 'get')

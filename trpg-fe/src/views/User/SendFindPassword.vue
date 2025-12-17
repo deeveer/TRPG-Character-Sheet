@@ -46,7 +46,7 @@ export default {
           this.$router.push('/')
         })
         .catch(err=>{
-          alert(err.data)
+          alert(err.response?.data || err.message || '發送失敗，請稍後再試')
           this.send=false
         })
     }

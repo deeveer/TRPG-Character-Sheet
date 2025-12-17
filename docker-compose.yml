@@ -7,7 +7,11 @@ services:
     ports:
       - 2100:2100
     environment:
-      DB_CONNECT: "${DB_CONNECT}"
+      DB_HOST: "${DB_HOST}"
+      DB_PORT: "${DB_PORT}"
+      DB_NAME: "${DB_NAME}"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
       JWT_SECRET: "${JWT_SECRET}"
       VBOT: "${VBOT}"
       VPASS: "${VPASS}"
@@ -19,13 +23,13 @@ services:
     depends_on:
       - trpg-db
   trpg-db:
-    image: mongo:5.0
+    image: mysql:8.0
     container_name: trpg-db
     restart: always
     ports:
-      - 27017:27017
+      - 3306:3306
     environment:
-      MONGO_INITDB_ROOT_USERNAME:  "${MONGO_INITDB_ROOT_USERNAME}"
-      MONGO_INITDB_ROOT_PASSWORD:  "${MONGO_INITDB_ROOT_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
     volumes:
-      - ./mongo/data:/data/db
+      - ./mysql/data:/var/lib/mysql

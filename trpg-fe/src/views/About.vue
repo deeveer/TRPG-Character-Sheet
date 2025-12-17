@@ -3,14 +3,6 @@
     <Title>關於</Title>
     <Tab :page="['介紹','團務功能','角色卡']" style="text-align: center">
       <div slot="介紹" class="about">
-        這是一個可以建置自動化TRPG角色卡的工具<br>
-        你可以使用這個網站來幫助你快速建立角色卡<br>
-        <div style="display: inline-block">
-          如果有任何疑惑或是建議，請直接私訊Discord:ItisCaleb#8775<br>
-          <a href="https://github.com/ItisCaleb" target="_blank"><i class="fa fa-github fa-2x"></i></a>
-          <a href="https://github.com/ItisCaleb" target="_blank">https://github.com/ItisCaleb</a><br>
-        </div>
-        <br>
         <router-link to="/privacy">隱私權政策</router-link>
       </div>
       <div slot="團務功能">
@@ -24,8 +16,6 @@
         <div>
           一人可擁有的角色卡上限為50張<br>
           而目前支援的系統為<br>
-          克蘇魯的召喚7版<br>
-          克蘇魯的召喚6版<br>
           龍與地下城5版<br>
         </div>
       </div>

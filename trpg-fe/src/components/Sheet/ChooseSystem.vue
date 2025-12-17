@@ -60,7 +60,7 @@ export default {
                 })
           })
           .catch(err => {
-            this.small=err.data
+            this.small = err.response?.data || err.message || '創建角色卡失敗，請稍後再試'
             this.created = false
           })
     }

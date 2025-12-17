@@ -97,7 +97,7 @@ const DND5eStory = sequelize.define('DND5eStory', {
     },
     note: {
         type: DataTypes.TEXT('long'),
-        defaultValue: ''
+        allowNull: true
     }
 }, {
     tableName: 'dnd5e_stories',

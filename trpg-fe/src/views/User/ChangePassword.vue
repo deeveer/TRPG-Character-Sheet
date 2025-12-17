@@ -80,7 +80,7 @@ export default {
             })
           })
           .catch(err => {
-            alert(err.data)
+            alert(err.response?.data || err.message || '修改密碼失敗，請稍後再試')
             this.$router.replace('/')
           })
     }

@@ -37,9 +37,14 @@ const sequelize = new Sequelize(
 sequelize.authenticate()
     .then(() => {
         console.log('MySQL DB connected');
+        // Sync database models
+        return sequelize.sync({ alter: true });
+    })
+    .then(() => {
+        console.log('Database synchronized');
     })
     .catch((err) => {
-        console.log('MySQL connection error:', err);
+        console.log('Database connection/sync error:', err);
     });
 
 // Export sequelize for models to use
@@ -86,15 +91,11 @@ app.all('*', function (req, res, next) {
     res.setHeader('Cache-Control', 'public, max-age=604800')
     next();
 })
-const SSRRouter = require('./utils/SSRRouter')
-app.use(express.static(path.join(__dirname, 'dist')));
-app.get('*',SSRRouter,function (req,res,next){
-    res.render('index',{title:req.title})
-    next()
-})
+// Remove SSR rendering for API-only backend
+// Frontend is served separately on port 8080
 
 // start server
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3002;
 const server = http.createServer(app);
 const io = require('socket.io')(server, {
     cors:corsOptions,

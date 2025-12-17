@@ -50,7 +50,7 @@ export default new Vuex.Store({
                         commit('session', session)
                         resolve()
                     })
-                    .catch(()=>reject())
+                    .catch(err => reject(err))
             })
 
         },
@@ -61,7 +61,7 @@ export default new Vuex.Store({
                         commit('sheet', sheet)
                         resolve()
                     })
-                    .catch(()=>{reject()})
+                    .catch(err => reject(err))
             })
 
         },

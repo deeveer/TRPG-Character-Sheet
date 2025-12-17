@@ -100,7 +100,7 @@ export default {
             })
           })
           .catch(err => {
-            alert(err.data)
+            alert(err.response?.data || err.message || '註冊失敗，請稍後再試')
             setTimeout(() => {
               this.send = false
             }, 1000)

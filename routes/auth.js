@@ -38,6 +38,41 @@ router.get("/register/:id", async (req, res) => {
 });
 
 
+// Direct registration without email verification (for local testing)
+router.post('/registerDirect', async (req, res) => {
+    // Validate input
+    const {error} = registerValidation(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    // Check if user already exists
+    const userExist = await User.findOne({ where: { name: req.body.name } });
+    const emailExist = await User.findOne({ where: { email: req.body.email } });
+
+    if (userExist) return res.status(400).send('暱稱已存在');
+    if (emailExist) return res.status(400).send('電子郵件已存在');
+    if (req.body.password !== req.body.repassword) return res.status(400).send('重新輸入密碼有誤');
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(req.body.password, salt);
+
+    try {
+        // Create new user directly
+        const newUser = await User.create({
+            name: req.body.name,
+            email: req.body.email,
+            password: hashPassword,
+            sheet_number: 0,
+        });
+
+        // Return success message
+        res.status(200).send('註冊成功！');
+    } catch (err) {
+        console.error('Registration error:', err);
+        res.status(500).send('註冊失敗，請稍後再試');
+    }
+});
+
 router.post('/authed', async (req, res) => {
 
     const mailTransport = nodeMailer.createTransport({
@@ -119,7 +154,8 @@ router.post('/userLogin', async (req, res) => {
         expires: new Date(Date.now() + (7 * day)),
         sameSite: 'lax',
         httpOnly: true,
-        secure: false
+        secure: false,
+        domain: 'localhost'
     })
     if (user.admin === true) {
         res.cookie('admin', 'True', {expires: new Date(Date.now() + (7 * day)), sameSite: 'lax'})

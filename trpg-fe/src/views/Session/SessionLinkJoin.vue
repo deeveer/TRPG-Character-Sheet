@@ -16,7 +16,7 @@ export default {
             this.$router.replace(`/session/info/${res.session}`)
           })
           .catch((err) => {
-            alert(err.data)
+            alert(err.response?.data || err.message || '加入失敗，請稍後再試')
             this.$router.replace('/')
           })
     }

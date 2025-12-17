@@ -101,10 +101,18 @@ export default {
                 this.$router.replace({
                   path: '/'
                 })
+              }).catch(postLoginErr => {
+                console.error('Post-login error:', postLoginErr)
+                // Still login the user even if session/sheet loading fails
+                this.$store.dispatch('loginActions', user)
+                this.$router.replace({
+                  path: '/'
+                })
               })
             })
             .catch(err => {
-              alert(err.data)
+              const errorMessage = err.response?.data || err.message || '登入失敗，請稍後再試'
+              alert(errorMessage)
               setTimeout(() => {
                 this.send = false
               }, 1000)
@@ -114,6 +122,11 @@ export default {
       }
     },
     googleSuccess(googleUser) {
+      if (!googleUser || !googleUser.getAuthResponse) {
+        console.error('Google login failed: invalid user object')
+        alert('Google 登入失敗，請重試')
+        return
+      }
       const data = {
         id: googleUser.getAuthResponse().id_token
       }
@@ -132,7 +145,8 @@ export default {
           })
         }
       }).catch(err => {
-        console.log(err.data)
+        console.log(err.response?.data || err.message)
+        alert('Google 登入失敗，請重試')
       })
     },
     googleFail(err){

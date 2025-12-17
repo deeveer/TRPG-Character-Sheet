@@ -7,6 +7,14 @@ const SessionLink = sequelize.define('SessionLink', {
         primaryKey: true,
         autoIncrement: true
     },
+    session_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'sessions',
+            key: 'id'
+        }
+    },
     code: {
         type: DataTypes.STRING,
         allowNull: false,

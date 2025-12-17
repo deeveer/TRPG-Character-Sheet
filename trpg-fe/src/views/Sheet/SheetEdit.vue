@@ -48,13 +48,6 @@ import Msgbox from "@/components/Msgbox";
 import ChangeLang from "@/components/Sheet/ChangeLang";
 import SheetNote from "@/components/Sheet/SheetNote";
 
-import COC7thInfo from "@/components/Sheet/COC7th/COC7thInfo";
-import COC7thBackground from "@/components/Sheet/COC7th/COC7thBackground";
-import COC7thSkill from "@/components/Sheet/COC7th/COC7thSkill"
-import COC6thInfo from "@/components/Sheet/COC6th/COC6thInfo";
-import COC6thEquip from "@/components/Sheet/COC6th/COC6thEquip";
-import COC6thSkill from "@/components/Sheet/COC6th/COC6thSkill";
-import COC6thBackground from "@/components/Sheet/COC6th/COC6thBackground";
 import DND5eInfo from "@/components/Sheet/DND5e/DND5eInfo";
 import DND5eStory from "@/components/Sheet/DND5e/DND5eStory";
 import DND5eEquip from "@/components/Sheet/DND5e/DND5eEquip";
@@ -63,8 +56,6 @@ import DND5eSpell from "@/components/Sheet/DND5e/DND5eSpell";
 export default {
   name: "SheetEdit",
   components: {SheetNote, ChangeLang, Msgbox, Load, Tab, Title,
-    COC7thInfo, COC7thSkill, COC7thBackground,
-    COC6thInfo, COC6thEquip, COC6thSkill, COC6thBackground,
     DND5eInfo, DND5eStory,DND5eEquip,DND5eSpell},
   data() {
     return {
@@ -170,7 +161,7 @@ export default {
                 })
           })
           .catch(err => {
-            alert(err.data)
+            alert(err.response?.data || err.message || '保存失敗，請稍後再試')
           })
     },
     loadSession() {

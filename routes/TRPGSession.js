@@ -81,7 +81,7 @@ router.get('/getInfo/:id', verify, async function (req, res) {
 
 //create invite link
 router.get('/createInvite/:id', async function (req, res) {
-    const codeExist = await SessionLink.findOne({ where: { id: req.params.id } })
+    const codeExist = await SessionLink.findOne({ where: { session_id: req.params.id } })
     if (codeExist) return res.sendStatus(400)
     const charSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     //get random code
@@ -89,7 +89,7 @@ router.get('/createInvite/:id', async function (req, res) {
         return charSet.charAt(Math.floor(Math.random() * charSet.length));
     }).join('');
     await SessionLink.create({
-        id: req.params.id,
+        session_id: req.params.id,
         code: code
     });
     res.send(code)
@@ -175,8 +175,12 @@ router.post('/uploadSheet/:id', verify, async function (req, res) {
         for (let index in sheet) {
             const info = await Info.findOne({ where: { id: sheet[index], author_id: req.token.id } });
             if (info) {
-                const updatedSession = [...(info.session || []), req.params.id];
-                await Info.update({ session: updatedSession }, { where: { id: sheet[index] } });
+                const currentSessions = info.session || [];
+                // Only add session ID if it's not already in the array
+                if (!currentSessions.includes(req.params.id)) {
+                    const updatedSession = [...currentSessions, req.params.id];
+                    await Info.update({ session: updatedSession }, { where: { id: sheet[index] } });
+                }
                 set.add(sheet[index])
             }
         }

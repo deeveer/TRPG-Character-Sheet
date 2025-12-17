@@ -132,15 +132,10 @@ const routes = [
     },
     {
         path: '/sheet/:system/:id',
-        name: 'SheetEdit',
-        component: () => import('../views/Sheet/SheetEdit'),
-    },
-    {
-        path: '/sheet/:system/:id',
-        name: 'SheetView',
-        component: () => import('../views/Sheet/SheetView'),
+        name: 'Sheet',
+        component: () => import('../views/Sheet/SheetDynamic'),
         props: route => ({
-            session: route.params.session
+            session: route.query.session
         })
     },
     {
